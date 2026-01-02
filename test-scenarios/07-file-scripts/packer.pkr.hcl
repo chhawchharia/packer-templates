@@ -51,16 +51,3 @@ provisioner "shell" {
   ]
 }
 
-/*
-# Plugin settings for Test 07: File Scripts
-PLUGIN_MODE=build
-PLUGIN_PACKER_FILE_PATH=test-scenarios/07-file-scripts/packer.pkr.hcl
-PLUGIN_IMAGE_NAME=file-scripts-test
-PLUGIN_IMAGE_VERSION=v1.0.0
-PLUGIN_TARGET_OS=linux
-PLUGIN_TARGET_ARCH=amd64
-PLUGIN_BASE_OS=ubuntu
-PLUGIN_BASE_VERSION=22.04
-PLUGIN_DEBUG=false
-
- */

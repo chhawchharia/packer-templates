@@ -1,11 +1,6 @@
 # Test 05: Python Development Environment
 # Installs Python 3 with pip, poetry, and common packages
-
-variable "python_version" {
-  type        = string
-  default     = "3.11"
-  description = "Python version"
-}
+# Uses system default Python (3.12 on Ubuntu 24.04)
 
 variable "pip_packages" {
   type        = list(string)
@@ -15,33 +10,30 @@ variable "pip_packages" {
 
 provisioner "shell" {
   inline = [
-    "echo '=== Installing Python ${var.python_version} ==='",
+    "echo '=== Setting up Python environment ==='",
     "export DEBIAN_FRONTEND=noninteractive",
-
+    
     "sudo apt-get update",
-    "sudo apt-get install -y python${var.python_version} python${var.python_version}-venv python${var.python_version}-dev python3-pip",
-
-    "# Make this Python version the default",
-    "sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${var.python_version} 1",
-    "sudo update-alternatives --install /usr/bin/python python /usr/bin/python${var.python_version} 1",
-
+    "# Install python3-full for venv support and pip",
+    "sudo apt-get install -y python3-full python3-pip python3-venv",
+    
     "python3 --version",
-    "pip3 --version",
-
-    "echo '=== Python installed ==='"
+    "pip3 --version || echo 'pip3 not directly available, using python3 -m pip'",
+    
+    "echo '=== Python setup complete ==='"
   ]
 }
 
 provisioner "shell" {
   inline = [
     "echo '=== Installing pip packages ==='",
-
-    "# Upgrade pip first",
-    "python3 -m pip install --upgrade pip",
-
+    
+    "# Upgrade pip first (use --break-system-packages for Ubuntu 24.04)",
+    "python3 -m pip install --upgrade pip --break-system-packages || python3 -m pip install --upgrade pip",
+    
     "# Install specified packages",
-    "python3 -m pip install ${join(" ", var.pip_packages)}",
-
+    "python3 -m pip install ${join(" ", var.pip_packages)} --break-system-packages || python3 -m pip install ${join(" ", var.pip_packages)}",
+    
     "echo '=== pip packages installed ==='"
   ]
 }
@@ -49,10 +41,11 @@ provisioner "shell" {
 provisioner "shell" {
   inline = [
     "echo '=== Installing pipx for isolated tools ==='",
-
-    "python3 -m pip install pipx",
-    "python3 -m pipx ensurepath",
-
+    
+    "# Install pipx via apt (preferred on Ubuntu 24.04)",
+    "sudo apt-get install -y pipx || python3 -m pip install pipx --break-system-packages",
+    "pipx ensurepath || python3 -m pipx ensurepath",
+    
     "echo '=== pipx installed ==='"
   ]
 }
@@ -69,16 +62,3 @@ provisioner "shell" {
   ]
 }
 
-/*
-# Plugin settings for Test 05: Python
-PLUGIN_MODE=build
-PLUGIN_PACKER_FILE_PATH=test-scenarios/05-python-pip/packer.pkr.hcl
-PLUGIN_IMAGE_NAME=python-dev
-PLUGIN_IMAGE_VERSION=v3.11.0
-PLUGIN_TARGET_OS=linux
-PLUGIN_TARGET_ARCH=amd64
-PLUGIN_BASE_OS=ubuntu
-PLUGIN_BASE_VERSION=22.04
-PLUGIN_DEBUG=false
-
- */
