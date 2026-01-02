@@ -1,0 +1,27 @@
+# Application configuration
+app:
+  name: myapp
+  version: 1.0.0
+  environment: production
+
+server:
+  host: 0.0.0.0
+  port: 8080
+  timeout: 30s
+
+logging:
+  level: info
+  format: json
+  output: /var/log/app.log
+
+database:
+  host: localhost
+  port: 5432
+  name: appdb
+  pool_size: 10
+
+features:
+  rate_limiting: true
+  caching: true
+  metrics: true
+
