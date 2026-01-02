@@ -1,27 +1,27 @@
 # Application configuration
 app:
   name: myapp
-  version: 1.0.0
+  port: 8080
   environment: production
 
+# Server settings
 server:
   host: 0.0.0.0
-  port: 8080
   timeout: 30s
+  max_connections: 100
 
+# Logging configuration
 logging:
   level: info
   format: json
-  output: /var/log/app.log
+  output: stdout
 
-database:
-  host: localhost
-  port: 5432
-  name: appdb
-  pool_size: 10
+# Health check
+health:
+  endpoint: /health
+  interval: 10s
 
+# Feature flags
 features:
+  cache_enabled: true
   rate_limiting: true
-  caching: true
-  metrics: true
-

@@ -36,4 +36,3 @@ chmod +x /opt/$APP_NAME/bin/health.sh
 echo "Application setup complete!"
 echo "Location: /opt/$APP_NAME"
 ls -la /opt/$APP_NAME/
-

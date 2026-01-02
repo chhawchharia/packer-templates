@@ -32,9 +32,9 @@ provisioner "shell" {
     "rm /tmp/go.tar.gz",
     
     "# Add Go to PATH",
-    "echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee /etc/profile.d/go.sh",
-    "echo 'export GOPATH=$HOME/go' | sudo tee -a /etc/profile.d/go.sh",
-    "echo 'export PATH=$PATH:$GOPATH/bin' | sudo tee -a /etc/profile.d/go.sh",
+    "echo 'export PATH=$$PATH:/usr/local/go/bin' | sudo tee /etc/profile.d/go.sh",
+    "echo 'export GOPATH=$$HOME/go' | sudo tee -a /etc/profile.d/go.sh",
+    "echo 'export PATH=$$PATH:$$GOPATH/bin' | sudo tee -a /etc/profile.d/go.sh",
     
     "/usr/local/go/bin/go version",
     

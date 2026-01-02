@@ -1,5 +1,6 @@
 # Test 07: File Provisioner with Scripts
 # Tests file provisioner with external script files
+# Relative paths are relative to the packer file directory
 
 variable "app_name" {
   type        = string
@@ -50,4 +51,3 @@ provisioner "shell" {
     "echo '=== All done ==='"
   ]
 }
-

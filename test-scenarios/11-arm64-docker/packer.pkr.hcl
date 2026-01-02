@@ -1,6 +1,7 @@
 # Test 11: ARM64 Docker Installation
 # Tests ARM64 architecture with Docker installation
 # Ubuntu 24.04 on ARM64 (t2a-standard-4 machine type)
+# Note: Use $$ to escape literal $ in Packer HCL strings
 
 variable "docker_compose_version" {
   type        = string
@@ -15,10 +16,10 @@ provisioner "shell" {
     "export DEBIAN_FRONTEND=noninteractive",
     
     "# Verify architecture",
-    "ARCH=$(dpkg --print-architecture)",
-    "echo \"Architecture: $ARCH\"",
-    "if [ \"$ARCH\" != \"arm64\" ]; then",
-    "  echo 'Warning: Expected arm64 but got $ARCH'",
+    "ARCH=$$(dpkg --print-architecture)",
+    "echo \"Architecture: $$ARCH\"",
+    "if [ \"$$ARCH\" != \"arm64\" ]; then",
+    "  echo \"Warning: Expected arm64 but got $$ARCH\"",
     "fi",
     
     "# Remove old versions",
@@ -34,11 +35,11 @@ provisioner "shell" {
     "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
     
     "# Add Docker repository (ARM64)",
-    "echo \"deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
     
-    "# Install Docker",
-    "sudo apt-get update",
-    "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+    "# Install Docker (with retry for transient 404s)",
+    "sudo apt-get update --fix-missing",
+    "sudo apt-get install -y --fix-missing docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || (sleep 5 && sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin)",
     
     "# Enable Docker service",
     "sudo systemctl enable docker",
@@ -75,11 +76,10 @@ provisioner "shell" {
 provisioner "shell" {
   inline = [
     "echo '=== Verification ==='",
-    "echo 'Architecture:' $(dpkg --print-architecture)",
+    "echo 'Architecture:' $$(dpkg --print-architecture)",
     "docker --version",
     "sudo docker compose version",
     "sudo docker info --format '{{.Architecture}}'",
     "echo '=== All done ==='"
   ]
 }
-

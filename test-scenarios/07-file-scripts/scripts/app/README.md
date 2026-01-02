@@ -1,9 +1,12 @@
-# Sample Application
+# MyApp
 
-This is a placeholder for the application code.
+This is a sample application directory for testing file provisioner.
 
 ## Structure
-- bin/ - Executable scripts
-- config/ - Configuration files
-- logs/ - Log files
 
+- `README.md` - This file
+- Additional files can be placed here
+
+## Usage
+
+This directory is copied to `/opt/myapp/` during image build.

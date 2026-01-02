@@ -31,7 +31,7 @@ provisioner "shell" {
     "# Set JAVA_HOME",
     "echo 'JAVA_HOME=/usr/lib/jvm/java-${var.java_version}-openjdk-amd64' | sudo tee -a /etc/environment",
     "echo 'export JAVA_HOME=/usr/lib/jvm/java-${var.java_version}-openjdk-amd64' | sudo tee /etc/profile.d/java.sh",
-    "echo 'export PATH=$PATH:$JAVA_HOME/bin' | sudo tee -a /etc/profile.d/java.sh",
+    "echo 'export PATH=$$PATH:$$JAVA_HOME/bin' | sudo tee -a /etc/profile.d/java.sh",
     
     "java -version",
     "javac -version",
@@ -52,7 +52,7 @@ provisioner "shell" {
     
     "# Add to PATH",
     "echo 'export M2_HOME=/opt/maven' | sudo tee /etc/profile.d/maven.sh",
-    "echo 'export PATH=$PATH:$M2_HOME/bin' | sudo tee -a /etc/profile.d/maven.sh",
+    "echo 'export PATH=$$PATH:$$M2_HOME/bin' | sudo tee -a /etc/profile.d/maven.sh",
     "sudo chmod +x /etc/profile.d/maven.sh",
     
     "/opt/maven/bin/mvn --version",
@@ -73,7 +73,7 @@ provisioner "shell" {
     
     "# Add to PATH",
     "echo 'export GRADLE_HOME=/opt/gradle' | sudo tee /etc/profile.d/gradle.sh",
-    "echo 'export PATH=$PATH:$GRADLE_HOME/bin' | sudo tee -a /etc/profile.d/gradle.sh",
+    "echo 'export PATH=$$PATH:$$GRADLE_HOME/bin' | sudo tee -a /etc/profile.d/gradle.sh",
     "sudo chmod +x /etc/profile.d/gradle.sh",
     
     "/opt/gradle/bin/gradle --version",
@@ -85,9 +85,9 @@ provisioner "shell" {
 provisioner "shell" {
   inline = [
     "echo '=== Final verification ==='",
-    "source /etc/profile.d/java.sh",
-    "source /etc/profile.d/maven.sh",
-    "source /etc/profile.d/gradle.sh",
+    ". /etc/profile.d/java.sh",
+    ". /etc/profile.d/maven.sh",
+    ". /etc/profile.d/gradle.sh",
     "echo 'Java:' && java -version 2>&1 | head -1",
     "echo 'Maven:' && /opt/maven/bin/mvn --version | head -1",
     "echo 'Gradle:' && /opt/gradle/bin/gradle --version | head -3",

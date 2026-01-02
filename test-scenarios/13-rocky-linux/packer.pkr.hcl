@@ -52,15 +52,15 @@ provisioner "shell" {
     "echo '=== Installing Go ==='",
     
     "GO_VERSION=1.22.0",
-    "curl -fsSL https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz -o /tmp/go.tar.gz",
+    "curl -fsSL https://go.dev/dl/go$$GO_VERSION.linux-amd64.tar.gz -o /tmp/go.tar.gz",
     "sudo rm -rf /usr/local/go",
     "sudo tar -C /usr/local -xzf /tmp/go.tar.gz",
     "rm /tmp/go.tar.gz",
     
     "# Add to PATH",
-    "echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee /etc/profile.d/go.sh",
-    "echo 'export GOPATH=$HOME/go' | sudo tee -a /etc/profile.d/go.sh",
-    "echo 'export PATH=$PATH:$GOPATH/bin' | sudo tee -a /etc/profile.d/go.sh",
+    "echo 'export PATH=$$PATH:/usr/local/go/bin' | sudo tee /etc/profile.d/go.sh",
+    "echo 'export GOPATH=$$HOME/go' | sudo tee -a /etc/profile.d/go.sh",
+    "echo 'export PATH=$$PATH:$$GOPATH/bin' | sudo tee -a /etc/profile.d/go.sh",
     
     "/usr/local/go/bin/go version",
     
