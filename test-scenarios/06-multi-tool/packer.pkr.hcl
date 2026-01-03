@@ -40,9 +40,9 @@ provisioner "shell" {
     "sudo tar -C /usr/local -xzf /tmp/go.tar.gz",
     "rm /tmp/go.tar.gz",
     
-    "echo 'export PATH=$$PATH:/usr/local/go/bin' | sudo tee /etc/profile.d/go.sh",
-    "echo 'export GOPATH=$$HOME/go' | sudo tee -a /etc/profile.d/go.sh",
-    "echo 'export PATH=$$PATH:$$GOPATH/bin' | sudo tee -a /etc/profile.d/go.sh",
+    "echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee /etc/profile.d/go.sh",
+    "echo 'export GOPATH=$HOME/go' | sudo tee -a /etc/profile.d/go.sh",
+    "echo 'export PATH=$PATH:$GOPATH/bin' | sudo tee -a /etc/profile.d/go.sh",
     
     "/usr/local/go/bin/go version",
     "echo '=== Go installed ==='"
@@ -60,10 +60,8 @@ provisioner "shell" {
     "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg",
     "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
     
-    "# Add Docker repository",
-    "ARCH=`dpkg --print-architecture`",
-    "RELEASE=`lsb_release -cs`",
-    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+    "# Add Docker repository - use single line to avoid HCL escaping issues",
+    "ARCH=`dpkg --print-architecture` && RELEASE=`lsb_release -cs` && echo \"deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
     
     "# Update and install with retry for transient 404s",
     "sudo apt-get update --fix-missing",
@@ -96,8 +94,7 @@ provisioner "shell" {
     "echo '=== Installing Helm ==='",
     
     "curl https://baltocdn.com/helm/signing.asc | gpg --batch --yes --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null",
-    "ARCH=`dpkg --print-architecture`",
-    "echo \"deb [arch=$$ARCH signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main\" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list",
+    "ARCH=`dpkg --print-architecture` && echo \"deb [arch=$ARCH signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main\" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list",
     "sudo apt-get update",
     "sudo apt-get install -y helm",
     

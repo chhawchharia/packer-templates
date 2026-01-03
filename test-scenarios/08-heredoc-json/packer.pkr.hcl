@@ -35,7 +35,8 @@ provisioner "shell" {
   ]
 }
 
-# Create bash script with loops - ALL bash $ must be escaped as $$
+# Create bash script with loops
+# Note: $${...} escapes to ${...} in HCL, but $varname passes through as-is
 provisioner "shell" {
   inline = [
     "echo '=== Creating bash scripts ==='",
@@ -45,13 +46,13 @@ provisioner "shell" {
     "SERVICES=(\"ssh\" \"cron\")",
     "echo \"Checking services...\"",
     "for svc in \"$${SERVICES[@]}\"; do",
-    "    if systemctl is-active --quiet \"$$svc\" 2>/dev/null; then",
-    "        echo \"OK: $$svc is running\"",
+    "    if systemctl is-active --quiet \"$svc\" 2>/dev/null; then",
+    "        echo \"OK: $svc is running\"",
     "    else",
-    "        echo \"SKIP: $$svc is not running\"",
+    "        echo \"SKIP: $svc is not running\"",
     "    fi",
     "done",
-    "DISK=`df -h / | awk 'NR==2 {print $$5}' | tr -d '%'`",
+    "DISK=`df -h / | awk 'NR==2 {print $5}' | tr -d '%'`",
     "echo \"Disk usage: $${DISK}%\"",
     "echo \"Service check complete\"",
     "BASHEOF",

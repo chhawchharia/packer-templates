@@ -23,10 +23,8 @@ provisioner "shell" {
     "curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg",
     "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
     
-    "# Add Docker repository for Debian",
-    "ARCH=`dpkg --print-architecture`",
-    ". /etc/os-release",
-    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $$VERSION_CODENAME stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+    "# Add Docker repository for Debian - use single line to avoid HCL escaping issues",
+    "ARCH=`dpkg --print-architecture` && . /etc/os-release && echo \"deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $VERSION_CODENAME stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
     
     "# Install Docker (with retry for transient 404s)",
     "sudo apt-get update --fix-missing",

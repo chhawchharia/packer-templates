@@ -24,10 +24,8 @@ provisioner "shell" {
     "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg",
     "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
     
-    "# Add Docker repository",
-    "ARCH=`dpkg --print-architecture`",
-    "RELEASE=`lsb_release -cs`",
-    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+    "# Add Docker repository - use single line to avoid HCL escaping issues",
+    "ARCH=`dpkg --print-architecture` && RELEASE=`lsb_release -cs` && echo \"deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
     
     "# Install Docker (with retry for transient 404s)",
     "sudo apt-get update --fix-missing",

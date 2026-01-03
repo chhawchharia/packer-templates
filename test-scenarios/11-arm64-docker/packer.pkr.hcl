@@ -16,11 +16,7 @@ provisioner "shell" {
     "export DEBIAN_FRONTEND=noninteractive",
     
     "# Verify architecture",
-    "ARCH=`dpkg --print-architecture`",
-    "echo \"Architecture: $$ARCH\"",
-    "if [ \"$$ARCH\" != \"arm64\" ]; then",
-    "  echo \"Warning: Expected arm64 but got $$ARCH\"",
-    "fi",
+    "echo \"Architecture: `dpkg --print-architecture`\"",
     
     "# Remove old versions",
     "sudo apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true",
@@ -34,9 +30,8 @@ provisioner "shell" {
     "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg",
     "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
     
-    "# Add Docker repository (ARM64)",
-    "RELEASE=`lsb_release -cs`",
-    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+    "# Add Docker repository (ARM64) - use command substitution directly",
+    "ARCH=`dpkg --print-architecture` && RELEASE=`lsb_release -cs` && echo \"deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
     
     "# Install Docker (with retry for transient 404s)",
     "sudo apt-get update --fix-missing",
