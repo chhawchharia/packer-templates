@@ -59,7 +59,11 @@ provisioner "shell" {
     "sudo install -m 0755 -d /etc/apt/keyrings",
     "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg",
     "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
-    "echo \"deb [arch=$$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+    
+    "# Add Docker repository",
+    "ARCH=`dpkg --print-architecture`",
+    "RELEASE=`lsb_release -cs`",
+    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
     
     "# Update and install with retry for transient 404s",
     "sudo apt-get update --fix-missing",
@@ -92,7 +96,8 @@ provisioner "shell" {
     "echo '=== Installing Helm ==='",
     
     "curl https://baltocdn.com/helm/signing.asc | gpg --batch --yes --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null",
-    "echo \"deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main\" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list",
+    "ARCH=`dpkg --print-architecture`",
+    "echo \"deb [arch=$$ARCH signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main\" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list",
     "sudo apt-get update",
     "sudo apt-get install -y helm",
     

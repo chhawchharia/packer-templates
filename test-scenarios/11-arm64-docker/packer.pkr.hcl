@@ -16,7 +16,7 @@ provisioner "shell" {
     "export DEBIAN_FRONTEND=noninteractive",
     
     "# Verify architecture",
-    "ARCH=$$(dpkg --print-architecture)",
+    "ARCH=`dpkg --print-architecture`",
     "echo \"Architecture: $$ARCH\"",
     "if [ \"$$ARCH\" != \"arm64\" ]; then",
     "  echo \"Warning: Expected arm64 but got $$ARCH\"",
@@ -35,7 +35,8 @@ provisioner "shell" {
     "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
     
     "# Add Docker repository (ARM64)",
-    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+    "RELEASE=`lsb_release -cs`",
+    "echo \"deb [arch=$$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $$RELEASE stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
     
     "# Install Docker (with retry for transient 404s)",
     "sudo apt-get update --fix-missing",
@@ -76,7 +77,7 @@ provisioner "shell" {
 provisioner "shell" {
   inline = [
     "echo '=== Verification ==='",
-    "echo 'Architecture:' $$(dpkg --print-architecture)",
+    "echo 'Architecture:' `dpkg --print-architecture`",
     "docker --version",
     "sudo docker compose version",
     "sudo docker info --format '{{.Architecture}}'",

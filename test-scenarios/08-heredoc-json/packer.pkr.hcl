@@ -51,7 +51,7 @@ provisioner "shell" {
     "        echo \"SKIP: $$svc is not running\"",
     "    fi",
     "done",
-    "DISK=$$(df -h / | awk 'NR==2 {print $$5}' | tr -d '%')",
+    "DISK=`df -h / | awk 'NR==2 {print $$5}' | tr -d '%'`",
     "echo \"Disk usage: $${DISK}%\"",
     "echo \"Service check complete\"",
     "BASHEOF",

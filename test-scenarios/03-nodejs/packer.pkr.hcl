@@ -72,9 +72,9 @@ provisioner "shell" {
 provisioner "shell" {
   inline = [
     "echo '=== Final verification ==='",
-    "echo 'Node.js:' $$(node --version)",
-    "echo 'npm:' $$(npm --version)",
-    "echo 'Yarn:' $$(yarn --version)",
+    "echo 'Node.js:' `node --version`",
+    "echo 'npm:' `npm --version`",
+    "echo 'Yarn:' `yarn --version`",
     "npm list -g --depth=0",
     "echo '=== All done ==='"
   ]

@@ -88,9 +88,9 @@ provisioner "shell" {
     ". /etc/profile.d/java.sh",
     ". /etc/profile.d/maven.sh",
     ". /etc/profile.d/gradle.sh",
-    "echo 'Java:' && java -version 2>&1 | head -1",
-    "echo 'Maven:' && /opt/maven/bin/mvn --version | head -1",
-    "echo 'Gradle:' && /opt/gradle/bin/gradle --version | head -3",
+    "echo 'Java:' && java -version 2>&1",
+    "echo 'Maven:' && /opt/maven/bin/mvn --version",
+    "echo 'Gradle:' && /opt/gradle/bin/gradle --version",
     "echo '=== All done ==='"
   ]
 }
