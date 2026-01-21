@@ -88,15 +88,13 @@ provisioner "shell" {
   ]
 }
 
-# Helm
+# Helm - using official install script (more reliable than baltocdn.com apt repo)
 provisioner "shell" {
   inline = [
     "echo '=== Installing Helm ==='",
     
-    "curl https://baltocdn.com/helm/signing.asc | gpg --batch --yes --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null",
-    "ARCH=`dpkg --print-architecture` && echo \"deb [arch=$ARCH signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main\" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list",
-    "sudo apt-get update",
-    "sudo apt-get install -y helm",
+    "# Use official Helm install script from GitHub (more reliable than baltocdn CDN)",
+    "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash",
     
     "helm version",
     "echo '=== Helm installed ==='"
@@ -115,7 +113,7 @@ provisioner "shell" {
     "/usr/local/go/bin/go version",
     "docker --version",
     "kubectl version --client --short 2>/dev/null || kubectl version --client | head -1",
-    "helm version --short",
+    "helm version --short 2>/dev/null || helm version | head -1",
     "git --version",
     "make --version | head -1",
     "echo ''",
