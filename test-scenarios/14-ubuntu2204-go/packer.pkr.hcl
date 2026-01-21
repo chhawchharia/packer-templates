@@ -47,7 +47,7 @@ provisioner "shell" {
   inline = [
     "echo '=== Installing golangci-lint ==='",
     
-    "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.55.2",
+    "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.55.2",
     
     "/usr/local/bin/golangci-lint --version",
     
