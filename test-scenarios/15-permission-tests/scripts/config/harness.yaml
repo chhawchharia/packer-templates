@@ -1,0 +1,44 @@
+# Harness CI Configuration
+# This file is used to test config file provisioning
+
+harness:
+  version: "1.0"
+  environment: production
+
+# CI Settings
+ci:
+  workspace: /opt/harness/workspace
+  cache: /opt/harness/cache
+  artifacts: /opt/harness/artifacts
+  
+  # Timeouts
+  timeouts:
+    step: 3600  # 1 hour
+    stage: 7200 # 2 hours
+    
+  # Retry settings
+  retry:
+    max_attempts: 3
+    delay_seconds: 10
+
+# Logging configuration
+logging:
+  level: info
+  format: json
+  output: /var/log/harness/ci.log
+  max_size: 100M
+  max_files: 5
+
+# Permission test markers
+permissions:
+  # These are used by the permission test scripts
+  script_mode: "755"
+  config_mode: "644"
+  directory_mode: "755"
+  
+# Feature flags
+features:
+  caching: true
+  artifact_upload: true
+  step_groups: true
+  matrix_builds: true

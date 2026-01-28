@@ -1,0 +1,47 @@
+# ==============================================================================
+# Harness Agent Configuration
+# ==============================================================================
+# This configuration file should have restricted permissions (640)
+# Only the service user and group should be able to read it.
+# ==============================================================================
+
+agent:
+  id: "${AGENT_ID:-default-agent}"
+  name: "${AGENT_NAME:-harness-ci-agent}"
+  version: "1.0.0"
+  
+# Connection settings
+connection:
+  manager_url: "${MANAGER_URL:-https://app.harness.io}"
+  poll_interval: 60
+  heartbeat_interval: 30
+  
+  # TLS settings
+  tls:
+    enabled: true
+    verify: true
+    
+# Authentication
+auth:
+  # Token should be provided via environment variable
+  token_env: "HARNESS_AGENT_TOKEN"
+  
+# Execution settings
+execution:
+  working_directory: "/opt/harness-secure/workspace"
+  temp_directory: "/opt/harness-secure/tmp"
+  max_concurrent_tasks: 5
+  
+# Logging
+logging:
+  level: "info"
+  format: "json"
+  file: "/opt/harness-secure/logs/agent.log"
+  max_size: "100MB"
+  max_files: 5
+  
+# Resource limits
+resources:
+  memory_limit: "2G"
+  cpu_limit: "2"
+  disk_limit: "10G"

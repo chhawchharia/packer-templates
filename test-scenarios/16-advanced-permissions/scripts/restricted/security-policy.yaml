@@ -1,0 +1,64 @@
+# ==============================================================================
+# Security Policy Configuration
+# ==============================================================================
+# This file defines security policies for the agent.
+# Should have restricted permissions (640) - owner read/write, group read only.
+# ==============================================================================
+
+security:
+  # Policy version
+  version: "1.0"
+  
+  # Allowed operations
+  allowed:
+    - shell_script
+    - docker_build
+    - docker_push
+    - git_clone
+    - artifact_upload
+    - artifact_download
+    
+  # Denied operations
+  denied:
+    - privileged_container
+    - host_network
+    - host_pid
+    
+  # Network policies
+  network:
+    # Allowed egress destinations
+    allowed_egress:
+      - "*.harness.io"
+      - "*.github.com"
+      - "*.docker.io"
+      - "*.gcr.io"
+      
+    # Blocked egress (takes precedence)
+    blocked_egress:
+      - "*.internal"
+      - "10.0.0.0/8"
+      
+  # File system policies
+  filesystem:
+    # Read-only paths (cannot be modified)
+    readonly:
+      - "/etc"
+      - "/usr"
+      - "/bin"
+      - "/sbin"
+      
+    # Writable paths
+    writable:
+      - "/opt/harness-secure/workspace"
+      - "/opt/harness-secure/tmp"
+      - "/opt/harness-secure/cache"
+      - "/tmp"
+      
+  # Resource limits enforcement
+  enforce_limits: true
+  
+  # Audit logging
+  audit:
+    enabled: true
+    log_file: "/opt/harness-secure/logs/audit.log"
+    log_level: "info"

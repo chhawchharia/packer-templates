@@ -28,6 +28,13 @@ Comprehensive test suite for validating the BYOI Builder plugin.
 | 13 | rocky-linux | AMD64 | Rocky 9 | Docker + Go on RHEL-compatible |
 | 14 | ubuntu2204-go | AMD64 | Ubuntu 22.04 | Go on older LTS |
 
+### Permission Testing
+
+| # | Name | Description | Key Tests |
+|---|------|-------------|-----------|
+| 15 | permission-tests | File provisioner permissions | Script copy, chmod, execution |
+| 16 | advanced-permissions | Service user permissions | User/group, elevated, restricted |
+
 ## Quick Start
 
 ### 1. Run Parser Tests (No GCP Required)
@@ -147,6 +154,37 @@ Use each test's `settings.env` file as reference for plugin configuration:
 - **Ubuntu Version**: 22.04 LTS (jammy)
 - **Use case**: Customers needing older LTS for stability
 
+### Test 15: Permission Tests
+- **Purpose**: Comprehensive file provisioner permission testing
+- **Tests**: Script copying, chmod, execution verification
+- **Features**: 
+  - File provisioner with multiple source directories
+  - Automatic permission setting after copy
+  - Script execution in various contexts
+  - Permission validation scripts
+- **Scripts**:
+  - `scripts/setup/01-init.sh` - System initialization
+  - `scripts/setup/02-packages.sh` - Package installation with retry
+  - `scripts/setup/03-configure.sh` - System configuration
+  - `scripts/validation/check-permissions.sh` - Permission validation
+  - `scripts/validation/verify-all.sh` - Comprehensive verification
+- **Local Testing**: Run `./run-local-test.sh` to test scripts locally
+
+### Test 16: Advanced Permissions
+- **Purpose**: Complex permission scenarios for production environments
+- **Tests**: Service users, elevated privileges, restricted configs
+- **Features**:
+  - Service user/group creation
+  - Secure directory structure with proper ownership
+  - Elevated scripts requiring root
+  - Restricted config files (640 permissions)
+  - Umask verification
+  - Systemd service file permissions
+- **Scripts**:
+  - `scripts/secured/` - Scripts owned by service user
+  - `scripts/elevated/` - Scripts requiring root privileges
+  - `scripts/restricted/` - Read-only configuration files
+
 ## Directory Structure
 
 ```
@@ -168,7 +206,24 @@ test-scenarios/
 ├── 11-arm64-docker/     # Ubuntu 24.04 ARM64
 ├── 12-debian-docker/    # Debian 12 AMD64
 ├── 13-rocky-linux/      # Rocky Linux 9 AMD64
-└── 14-ubuntu2204-go/    # Ubuntu 22.04 AMD64
+├── 14-ubuntu2204-go/    # Ubuntu 22.04 AMD64
+│
+├── 15-permission-tests/ # Permission testing
+│   ├── packer.pkr.hcl
+│   ├── settings.env
+│   ├── run-local-test.sh
+│   └── scripts/
+│       ├── setup/
+│       ├── validation/
+│       └── config/
+│
+└── 16-advanced-permissions/  # Advanced permission scenarios
+    ├── packer.pkr.hcl
+    ├── settings.env
+    └── scripts/
+        ├── secured/
+        ├── elevated/
+        └── restricted/
 ```
 
 Each test directory contains:
@@ -189,4 +244,17 @@ When testing, verify:
 - [ ] Access token is marked `sensitive = true`
 - [ ] File provisioner relative paths work
 - [ ] Heredocs with braces don't break parsing
+
+### Permission Testing Checklist (Tests 15-16)
+
+- [ ] Scripts are copied via file provisioner
+- [ ] Scripts have executable permissions after copy (755)
+- [ ] Scripts can be executed without permission errors
+- [ ] Config files have restrictive permissions (644 or 640)
+- [ ] Directory permissions are correct (755 or 750)
+- [ ] Service user scripts work with correct ownership
+- [ ] Elevated scripts require root to execute
+- [ ] No world-writable files in secure directories
+- [ ] Secrets directory has 700 permissions
+- [ ] Systemd service files have 644 permissions
 
