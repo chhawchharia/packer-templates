@@ -34,26 +34,27 @@ variable "config_dir" {
 # ==============================================================================
 # FILE PROVISIONERS - Copy all scripts and configs to target
 # ==============================================================================
-# Note: When copying a directory with trailing slash, Packer uploads the contents
-# directly to the destination. When copying without trailing slash, it preserves
-# the directory name.
+# Note: Packer file provisioner behavior:
+# - source with trailing slash: uploads CONTENTS of the directory
+# - destination WITHOUT trailing slash: creates the directory and puts contents inside
+# - destination WITH trailing slash: expects directory to already exist (will fail if not)
 
-# Copy setup scripts (individual files to flat destination)
+# Copy setup scripts (contents of scripts/setup/ -> /tmp/harness-setup-scripts/)
 provisioner "file" {
   source      = "scripts/setup/"
-  destination = "/tmp/harness-setup-scripts/"
+  destination = "/tmp/harness-setup-scripts"
 }
 
-# Copy validation scripts (individual files to flat destination)
+# Copy validation scripts
 provisioner "file" {
   source      = "scripts/validation/"
-  destination = "/tmp/harness-validation-scripts/"
+  destination = "/tmp/harness-validation-scripts"
 }
 
-# Copy config files (individual files to flat destination)
+# Copy config files
 provisioner "file" {
   source      = "scripts/config/"
-  destination = "/tmp/harness-config-files/"
+  destination = "/tmp/harness-config-files"
 }
 
 # ==============================================================================
