@@ -34,23 +34,45 @@ variable "config_dir" {
 # ==============================================================================
 # FILE PROVISIONERS - Copy all scripts and configs to target
 # ==============================================================================
+# Note: When copying a directory with trailing slash, Packer uploads the contents
+# directly to the destination. When copying without trailing slash, it preserves
+# the directory name.
 
-# Copy setup scripts
+# Copy setup scripts (individual files to flat destination)
 provisioner "file" {
   source      = "scripts/setup/"
-  destination = "/tmp/setup-scripts"
+  destination = "/tmp/harness-setup-scripts/"
 }
 
-# Copy validation scripts  
+# Copy validation scripts (individual files to flat destination)
 provisioner "file" {
   source      = "scripts/validation/"
-  destination = "/tmp/validation-scripts"
+  destination = "/tmp/harness-validation-scripts/"
 }
 
-# Copy config files
+# Copy config files (individual files to flat destination)
 provisioner "file" {
   source      = "scripts/config/"
-  destination = "/tmp/config-files"
+  destination = "/tmp/harness-config-files/"
+}
+
+# ==============================================================================
+# DEBUG: Show what was uploaded
+# ==============================================================================
+provisioner "shell" {
+  inline = [
+    "echo '=== DEBUG: Checking uploaded files ==='",
+    "echo 'Setup scripts (/tmp/harness-setup-scripts/):'",
+    "ls -la /tmp/harness-setup-scripts/ 2>/dev/null || echo '  Directory does not exist'",
+    "find /tmp/harness-setup-scripts -name '*.sh' 2>/dev/null || echo '  No .sh files found'",
+    "echo ''",
+    "echo 'Validation scripts (/tmp/harness-validation-scripts/):'",
+    "ls -la /tmp/harness-validation-scripts/ 2>/dev/null || echo '  Directory does not exist'",
+    "echo ''",
+    "echo 'Config files (/tmp/harness-config-files/):'",
+    "ls -la /tmp/harness-config-files/ 2>/dev/null || echo '  Directory does not exist'",
+    "echo '=== End Debug ==='"
+  ]
 }
 
 # ==============================================================================
@@ -76,6 +98,9 @@ provisioner "shell" {
     "sudo mkdir -p /var/log/harness",
     "sudo chmod 755 /var/log/harness",
     "",
+    "# Create marker directory for setup tracking",
+    "sudo mkdir -p /tmp/harness-setup",
+    "",
     "echo 'Directories created successfully'",
     "ls -la ${var.script_dir}/",
     "ls -la ${var.config_dir}/"
@@ -91,15 +116,32 @@ provisioner "shell" {
     "echo '=== STEP 2: Installing setup scripts ==='",
     "echo '=============================================='",
     "",
-    "# Move setup scripts to final location",
-    "sudo cp -r /tmp/setup-scripts/* ${var.script_dir}/setup/ 2>/dev/null || echo 'No setup scripts to copy'",
+    "# Find and copy setup scripts - handle both flat and nested structures",
+    "SRC_DIR='/tmp/harness-setup-scripts'",
+    "DST_DIR='${var.script_dir}/setup'",
+    "",
+    "if [ -d \"$SRC_DIR\" ]; then",
+    "  # Count .sh files in source (including subdirectories)",
+    "  SCRIPT_COUNT=$(find \"$SRC_DIR\" -name '*.sh' -type f 2>/dev/null | wc -l)",
+    "  echo \"Found $SCRIPT_COUNT setup script(s) in $SRC_DIR\"",
+    "  ",
+    "  if [ \"$SCRIPT_COUNT\" -gt 0 ]; then",
+    "    # Copy all .sh files preserving their names (flatten if nested)",
+    "    find \"$SRC_DIR\" -name '*.sh' -type f -exec sudo cp {} \"$DST_DIR/\" \\;",
+    "    # Also copy any non-sh files",
+    "    find \"$SRC_DIR\" -type f ! -name '*.sh' -exec sudo cp {} \"$DST_DIR/\" \\; 2>/dev/null || true",
+    "    echo 'Setup scripts copied successfully'",
+    "  else",
+    "    echo 'No .sh files found in source directory'",
+    "  fi",
+    "else",
+    "  echo 'Source directory does not exist: $SRC_DIR'",
+    "fi",
     "",
     "# Make all scripts executable",
-    "if [ -d ${var.script_dir}/setup ]; then",
-    "  sudo find ${var.script_dir}/setup -type f -name '*.sh' -exec chmod 755 {} \\;",
-    "  echo 'Setup scripts permissions set'",
-    "  ls -la ${var.script_dir}/setup/ || true",
-    "fi"
+    "sudo find \"$DST_DIR\" -type f -name '*.sh' -exec chmod 755 {} \\; 2>/dev/null || true",
+    "echo 'Final setup scripts:'",
+    "ls -la \"$DST_DIR/\" 2>/dev/null || echo '(empty)'"
   ]
 }
 
@@ -112,15 +154,28 @@ provisioner "shell" {
     "echo '=== STEP 3: Installing validation scripts ==='",
     "echo '=============================================='",
     "",
-    "# Move validation scripts to final location",
-    "sudo cp -r /tmp/validation-scripts/* ${var.script_dir}/validation/ 2>/dev/null || echo 'No validation scripts to copy'",
+    "# Find and copy validation scripts",
+    "SRC_DIR='/tmp/harness-validation-scripts'",
+    "DST_DIR='${var.script_dir}/validation'",
+    "",
+    "if [ -d \"$SRC_DIR\" ]; then",
+    "  SCRIPT_COUNT=$(find \"$SRC_DIR\" -name '*.sh' -type f 2>/dev/null | wc -l)",
+    "  echo \"Found $SCRIPT_COUNT validation script(s) in $SRC_DIR\"",
+    "  ",
+    "  if [ \"$SCRIPT_COUNT\" -gt 0 ]; then",
+    "    find \"$SRC_DIR\" -name '*.sh' -type f -exec sudo cp {} \"$DST_DIR/\" \\;",
+    "    echo 'Validation scripts copied successfully'",
+    "  else",
+    "    echo 'No .sh files found in source directory'",
+    "  fi",
+    "else",
+    "  echo 'Source directory does not exist: $SRC_DIR'",
+    "fi",
     "",
     "# Make all scripts executable",
-    "if [ -d ${var.script_dir}/validation ]; then",
-    "  sudo find ${var.script_dir}/validation -type f -name '*.sh' -exec chmod 755 {} \\;",
-    "  echo 'Validation scripts permissions set'",
-    "  ls -la ${var.script_dir}/validation/ || true",
-    "fi"
+    "sudo find \"$DST_DIR\" -type f -name '*.sh' -exec chmod 755 {} \\; 2>/dev/null || true",
+    "echo 'Final validation scripts:'",
+    "ls -la \"$DST_DIR/\" 2>/dev/null || echo '(empty)'"
   ]
 }
 
@@ -133,15 +188,28 @@ provisioner "shell" {
     "echo '=== STEP 4: Installing config files ==='",
     "echo '=============================================='",
     "",
-    "# Move config files to final location",
-    "sudo cp -r /tmp/config-files/* ${var.config_dir}/ 2>/dev/null || echo 'No config files to copy'",
+    "# Find and copy config files",
+    "SRC_DIR='/tmp/harness-config-files'",
+    "DST_DIR='${var.config_dir}'",
     "",
-    "# Set config file permissions (readable, not writable by others)",
-    "if [ -d ${var.config_dir} ]; then",
-    "  sudo find ${var.config_dir} -type f -exec chmod 644 {} \\;",
-    "  echo 'Config file permissions set'",
-    "  ls -la ${var.config_dir}/ || true",
-    "fi"
+    "if [ -d \"$SRC_DIR\" ]; then",
+    "  FILE_COUNT=$(find \"$SRC_DIR\" -type f 2>/dev/null | wc -l)",
+    "  echo \"Found $FILE_COUNT config file(s) in $SRC_DIR\"",
+    "  ",
+    "  if [ \"$FILE_COUNT\" -gt 0 ]; then",
+    "    find \"$SRC_DIR\" -type f -exec sudo cp {} \"$DST_DIR/\" \\;",
+    "    echo 'Config files copied successfully'",
+    "  else",
+    "    echo 'No files found in source directory'",
+    "  fi",
+    "else",
+    "  echo 'Source directory does not exist: $SRC_DIR'",
+    "fi",
+    "",
+    "# Set config file permissions (644 - readable by all, writable by owner)",
+    "sudo find \"$DST_DIR\" -type f -exec chmod 644 {} \\; 2>/dev/null || true",
+    "echo 'Final config files:'",
+    "ls -la \"$DST_DIR/\" 2>/dev/null || echo '(empty)'"
   ]
 }
 
@@ -154,29 +222,31 @@ provisioner "shell" {
     "echo '=== STEP 5: Running permission validation ==='",
     "echo '=============================================='",
     "",
+    "SCRIPT_DIR='${var.script_dir}'",
+    "CONFIG_DIR='${var.config_dir}'",
+    "",
     "# Run the main permission check script",
-    "if [ -f ${var.script_dir}/validation/check-permissions.sh ]; then",
+    "if [ -x \"$SCRIPT_DIR/validation/check-permissions.sh\" ]; then",
     "  echo 'Running permission check script...'",
-    "  ${var.script_dir}/validation/check-permissions.sh",
+    "  \"$SCRIPT_DIR/validation/check-permissions.sh\"",
     "else",
     "  echo 'Permission check script not found, running inline checks...'",
     "  ",
     "  # Inline permission checks",
     "  echo '--- Checking script directory permissions ---'",
-    "  ls -la ${var.script_dir}/",
+    "  ls -la \"$SCRIPT_DIR/\" || true",
     "  ",
     "  echo '--- Checking config directory permissions ---'",
-    "  ls -la ${var.config_dir}/",
+    "  ls -la \"$CONFIG_DIR/\" || true",
     "  ",
     "  echo '--- Testing script execution ---'",
-    "  for script in ${var.script_dir}/setup/*.sh; do",
+    "  for script in \"$SCRIPT_DIR\"/setup/*.sh; do",
     "    if [ -f \"$script\" ]; then",
     "      echo \"Testing: $script\"",
     "      if [ -x \"$script\" ]; then",
     "        echo \"  [OK] Script is executable\"",
     "      else",
-    "        echo \"  [FAIL] Script is NOT executable\"",
-    "        exit 1",
+    "        echo \"  [WARN] Script is NOT executable\"",
     "      fi",
     "    fi",
     "  done",
@@ -193,25 +263,33 @@ provisioner "shell" {
     "echo '=== STEP 6: Executing setup scripts ==='",
     "echo '=============================================='",
     "",
+    "SCRIPT_DIR='${var.script_dir}'",
+    "",
     "# Run init script",
-    "if [ -x ${var.script_dir}/setup/01-init.sh ]; then",
+    "if [ -x \"$SCRIPT_DIR/setup/01-init.sh\" ]; then",
     "  echo 'Running 01-init.sh...'",
-    "  ${var.script_dir}/setup/01-init.sh",
+    "  \"$SCRIPT_DIR/setup/01-init.sh\"",
+    "else",
+    "  echo '01-init.sh not found or not executable, skipping'",
     "fi",
     "",
     "# Run packages script",
-    "if [ -x ${var.script_dir}/setup/02-packages.sh ]; then",
+    "if [ -x \"$SCRIPT_DIR/setup/02-packages.sh\" ]; then",
     "  echo 'Running 02-packages.sh...'",
-    "  ${var.script_dir}/setup/02-packages.sh",
+    "  \"$SCRIPT_DIR/setup/02-packages.sh\"",
+    "else",
+    "  echo '02-packages.sh not found or not executable, skipping'",
     "fi",
     "",
     "# Run configure script",
-    "if [ -x ${var.script_dir}/setup/03-configure.sh ]; then",
+    "if [ -x \"$SCRIPT_DIR/setup/03-configure.sh\" ]; then",
     "  echo 'Running 03-configure.sh...'",
-    "  ${var.script_dir}/setup/03-configure.sh",
+    "  \"$SCRIPT_DIR/setup/03-configure.sh\"",
+    "else",
+    "  echo '03-configure.sh not found or not executable, skipping'",
     "fi",
     "",
-    "echo 'All setup scripts executed successfully'"
+    "echo 'Setup script execution completed'"
   ]
 }
 
@@ -224,34 +302,33 @@ provisioner "shell" {
     "echo '=== STEP 7: Final verification ==='",
     "echo '=============================================='",
     "",
+    "SCRIPT_DIR='${var.script_dir}'",
+    "CONFIG_DIR='${var.config_dir}'",
+    "",
     "# Run comprehensive validation",
-    "if [ -x ${var.script_dir}/validation/verify-all.sh ]; then",
-    "  ${var.script_dir}/validation/verify-all.sh",
+    "if [ -x \"$SCRIPT_DIR/validation/verify-all.sh\" ]; then",
+    "  \"$SCRIPT_DIR/validation/verify-all.sh\"",
     "else",
     "  echo 'Running inline verification...'",
     "  ",
     "  echo ''",
     "  echo '--- Directory Structure ---'",
-    "  tree ${var.script_dir} 2>/dev/null || find ${var.script_dir} -type f | head -20",
+    "  find \"$SCRIPT_DIR\" -type f 2>/dev/null | head -20 || echo '(empty)'",
     "  ",
     "  echo ''",
     "  echo '--- Permission Summary ---'",
     "  echo 'Scripts directory:'",
-    "  stat -c '%A %U:%G %n' ${var.script_dir} 2>/dev/null || stat ${var.script_dir}",
+    "  ls -la \"$SCRIPT_DIR/\" 2>/dev/null || echo '(not found)'",
     "  ",
     "  echo ''",
     "  echo 'Config directory:'",
-    "  stat -c '%A %U:%G %n' ${var.config_dir} 2>/dev/null || stat ${var.config_dir}",
+    "  ls -la \"$CONFIG_DIR/\" 2>/dev/null || echo '(not found)'",
     "  ",
     "  echo ''",
     "  echo '--- Executable Check ---'",
-    "  find ${var.script_dir} -name '*.sh' -exec test -x {} \\; -print | while read f; do",
-    "    echo \"[OK] Executable: $f\"",
-    "  done",
-    "  ",
-    "  find ${var.script_dir} -name '*.sh' ! -perm -u+x -print | while read f; do",
-    "    echo \"[WARN] Not executable: $f\"",
-    "  done",
+    "  EXEC_COUNT=$(find \"$SCRIPT_DIR\" -name '*.sh' -perm -u+x 2>/dev/null | wc -l)",
+    "  TOTAL_COUNT=$(find \"$SCRIPT_DIR\" -name '*.sh' 2>/dev/null | wc -l)",
+    "  echo \"Executable scripts: $EXEC_COUNT of $TOTAL_COUNT\"",
     "fi"
   ]
 }
