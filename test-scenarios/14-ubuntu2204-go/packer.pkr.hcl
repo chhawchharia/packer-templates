@@ -43,19 +43,23 @@ provisioner "shell" {
 }
 
 # Install golangci-lint
+# Note: Set HOME=/tmp to avoid permission issues with OS Login users
+# who may not have write access to /home/ubuntu/.cache
 provisioner "shell" {
   inline = [
     "echo '=== Installing golangci-lint ==='",
     
     "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.55.2",
     
-    "/usr/local/bin/golangci-lint --version",
+    "# Set HOME to /tmp to avoid cache permission issues with OS Login",
+    "export HOME=/tmp && /usr/local/bin/golangci-lint --version",
     
     "echo '=== golangci-lint installed ==='"
   ]
 }
 
 # Verification
+# Note: Set HOME=/tmp for golangci-lint to avoid cache permission issues
 provisioner "shell" {
   inline = [
     "echo '=== Verification ==='",
@@ -66,7 +70,7 @@ provisioner "shell" {
     "/usr/local/go/bin/go version",
     "echo ''",
     "echo 'golangci-lint:'",
-    "/usr/local/bin/golangci-lint --version",
+    "export HOME=/tmp && /usr/local/bin/golangci-lint --version",
     "echo ''",
     "echo 'Build Tools:'",
     "gcc --version | head -1",
