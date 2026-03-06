@@ -32,6 +32,7 @@ provisioner "powershell" {
     "choco install -y Temurin${var.java_major_version}",
     "Import-Module $env:ChocolateyInstall\\helpers\\chocolateyProfile.psm1",
     "Update-SessionEnvironment",
+    "$env:JAVA_HOME = [Environment]::GetEnvironmentVariable('JAVA_HOME', 'Machine')",
     "java -version",
     "javac -version",
     "Write-Host \"JAVA_HOME = $env:JAVA_HOME\"",
