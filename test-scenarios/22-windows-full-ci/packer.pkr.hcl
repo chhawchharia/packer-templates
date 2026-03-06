@@ -128,7 +128,7 @@ provisioner "powershell" {
     "Import-Module $env:ChocolateyInstall\\helpers\\chocolateyProfile.psm1",
     "Update-SessionEnvironment",
     "mvn --version 2>&1 | Select-Object -First 1",
-    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1",
+    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1; $global:LASTEXITCODE = 0",
     "Write-Host '=== Maven + Gradle installed ==='"
   ]
 }
@@ -222,7 +222,7 @@ provisioner "powershell" {
     "",
     "Write-Host '--- Build Tools ---'",
     "mvn --version 2>&1 | Select-Object -First 1 | ForEach-Object { Write-Host \"  Maven:   $_\" }",
-    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1 | ForEach-Object { Write-Host \"  Gradle:  $_\" }",
+    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1 | ForEach-Object { Write-Host \"  Gradle:  $_\" }; $global:LASTEXITCODE = 0",
     "cmake --version 2>&1 | Select-Object -First 1 | ForEach-Object { Write-Host \"  CMake:   $_\" }",
     "make --version 2>&1 | Select-Object -First 1 | ForEach-Object { Write-Host \"  Make:    $_\" }",
     "Write-Host \"  npm:     $(npm --version)\"",
