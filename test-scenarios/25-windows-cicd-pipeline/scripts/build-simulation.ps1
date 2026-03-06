@@ -67,6 +67,7 @@ Push-Location $projectDir
 git init 2>&1 | Out-Null
 git config user.email "ci@harness.io"
 git config user.name "CI Agent"
+git config core.autocrlf false
 "test file" | Set-Content "test.txt"
 git add . 2>&1 | Out-Null
 git commit -m "initial" 2>&1 | Out-Null

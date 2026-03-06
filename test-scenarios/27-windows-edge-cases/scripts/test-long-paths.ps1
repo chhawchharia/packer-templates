@@ -19,12 +19,11 @@ for ($i = 1; $i -le 15; $i++) {
 Write-Host "Path length: $($deep.Length) characters"
 
 try {
-    # Use \\?\ prefix to bypass the 260-char limit without requiring a reboot
     $extendedPath = "\\?\$deep"
-    New-Item -ItemType Directory -Force -Path $extendedPath | Out-Null
-    $testFile = Join-Path $extendedPath "test_file.txt"
-    "This is a test file at a long path" | Set-Content -LiteralPath $testFile
-    $content = Get-Content -LiteralPath $testFile
+    [System.IO.Directory]::CreateDirectory($extendedPath) | Out-Null
+    $testFile = "$extendedPath\test_file.txt"
+    [System.IO.File]::WriteAllText($testFile, "This is a test file at a long path")
+    $content = [System.IO.File]::ReadAllText($testFile)
     if ($content -eq "This is a test file at a long path") {
         Write-Host "[PASS] Created and read file at $($deep.Length + 14)-char path"
     } else {
@@ -35,5 +34,5 @@ try {
     Write-Host "[FAIL] Long path operations failed: $_"
     exit 1
 } finally {
-    Remove-Item -Recurse -Force "\\?\$base" -ErrorAction SilentlyContinue
+    try { [System.IO.Directory]::Delete("\\?\$base", $true) } catch { }
 }

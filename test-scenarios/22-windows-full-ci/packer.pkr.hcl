@@ -47,6 +47,7 @@ provisioner "powershell" {
     "Import-Module $env:ChocolateyInstall\\helpers\\chocolateyProfile.psm1",
     "Update-SessionEnvironment",
     "$env:JAVA_HOME = [Environment]::GetEnvironmentVariable('JAVA_HOME', 'Machine')",
+    "if (-not $env:JAVA_HOME) { $jdkDir = Get-ChildItem 'C:\\Program Files\\Eclipse Adoptium' -Directory -ErrorAction SilentlyContinue | Select-Object -First 1; if ($jdkDir) { $env:JAVA_HOME = $jdkDir.FullName; [Environment]::SetEnvironmentVariable('JAVA_HOME', $env:JAVA_HOME, 'Machine') } }",
     "java -version",
     "javac -version",
     "Write-Host \"JAVA_HOME = $env:JAVA_HOME\"",
