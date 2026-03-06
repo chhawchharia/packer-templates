@@ -26,20 +26,11 @@ foreach ($dir in $directories) {
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
 }
 
-# Set npm cache
-npm config set cache "$CacheDir\npm" 2>$null
-
-# Set NuGet cache
-$nugetConfigDir = "$env:APPDATA\NuGet"
-if (-not (Test-Path $nugetConfigDir)) {
-    New-Item -ItemType Directory -Force -Path $nugetConfigDir | Out-Null
-}
-
-# Set pip cache
+# Configure cache env vars at machine level (tools will use them when installed later)
+[Environment]::SetEnvironmentVariable("NPM_CONFIG_CACHE", "$CacheDir\npm", "Machine")
 [Environment]::SetEnvironmentVariable("PIP_CACHE_DIR", "$CacheDir\pip", "Machine")
-
-# Set Go module cache
 [Environment]::SetEnvironmentVariable("GOMODCACHE", "$CacheDir\go", "Machine")
+[Environment]::SetEnvironmentVariable("NUGET_PACKAGES", "$CacheDir\nuget", "Machine")
 
 Write-Host "CI agent directories created:"
 foreach ($dir in $directories) {
