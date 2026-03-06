@@ -1,0 +1,2 @@
+Harness BYOI - Windows Container Test Application
+Version: 1.0.0

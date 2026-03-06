@@ -1,0 +1,5 @@
+$env:HARNESS_HOME    = "C:\Harness"
+$env:HARNESS_AGENT   = "C:\Harness\Agent"
+$env:CI              = "true"
+$env:HARNESS_CI      = "true"
+$env:LANG            = "en_US.UTF-8"

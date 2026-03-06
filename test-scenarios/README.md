@@ -28,7 +28,23 @@ Comprehensive test suite for validating the BYOI Builder plugin.
 | 13 | rocky-linux | AMD64 | Rocky 9 | Docker + Go on RHEL-compatible |
 | 14 | ubuntu2204-go | AMD64 | Ubuntu 22.04 | Go on older LTS |
 
-### Permission Testing
+### Windows (AMD64) - File Provisioner & Scripts
+
+| # | Name | Description | Key Tests |
+|---|------|-------------|-----------|
+| 17 | windows-1 | Basic Windows tools | Node.js, Python, .NET via Chocolatey |
+| 18 | windows-minimal | Empty (Harness defaults) | Only Harness pre-installed tools |
+| 19 | windows-java-dotnet | Java + .NET | Temurin JDK, Maven, Gradle, .NET |
+| 20 | windows-nodejs-frontend | Frontend tools | Node.js, Yarn, pnpm, Python |
+| 21 | windows-devops | DevOps/infra tools | Go, kubectl, Helm, Terraform, CLIs |
+| 22 | windows-full-ci | Full CI environment | All languages + build + cloud tools |
+| 23 | windows-file-scripts | File provisioner + scripts | Copy .ps1 to VM, run with params |
+| 24 | windows-config-deploy | Config deployment | Dir copy, JSON/YAML config, validation |
+| 25 | windows-cicd-pipeline | CI/CD simulation | Agent setup, build sim, git ops, cleanup |
+| 26 | windows-env-registry | Env vars & registry | Machine env vars, registry, PATH, persist |
+| 27 | windows-edge-cases | Edge cases & stress | Long paths, special chars, network, state |
+
+### Permission Testing (Linux)
 
 | # | Name | Description | Key Tests |
 |---|------|-------------|-----------|
@@ -154,6 +170,69 @@ Use each test's `settings.env` file as reference for plugin configuration:
 - **Ubuntu Version**: 22.04 LTS (jammy)
 - **Use case**: Customers needing older LTS for stability
 
+### Test 23: Windows File Scripts
+- **Purpose**: Test file provisioner with external PowerShell scripts on Windows
+- **Provisioners**: 3 file + 4 powershell
+- **Files**: `scripts/setup-tools.ps1`, `scripts/install-packages.ps1`, `scripts/verify-env.ps1`
+- **Tests**:
+  - Copy `.ps1` files to VM via file provisioner
+  - Run scripts with parameters (`-ToolsDir`, `-AppName`)
+  - Script-based Chocolatey package installation
+  - Health check from deployed script
+  - Environment verification
+- **Use case**: Customers with existing setup scripts
+
+### Test 24: Windows Config Deployment
+- **Purpose**: Test config file deployment with directory copy
+- **Provisioners**: 3 file + 4 powershell
+- **Files**: `scripts/config/` (JSON, YAML, PS1), `scripts/setup/` (deploy, validate)
+- **Tests**:
+  - Directory copy via file provisioner (trailing slash)
+  - JSON config deserialization and validation
+  - YAML content verification
+  - Directory structure creation from script
+  - Cross-provisioner config reading
+- **Use case**: Customers deploying application configurations
+
+### Test 25: Windows CI/CD Pipeline Simulation
+- **Purpose**: Simulate a realistic CI/CD agent setup and build flow
+- **Provisioners**: 3 file + 5 powershell
+- **Files**: `scripts/setup-ci-agent.ps1`, `scripts/build-simulation.ps1`, `scripts/cleanup.ps1`
+- **Tests**:
+  - CI agent directory + cache structure creation
+  - npm/pip/Go cache directory configuration
+  - Build simulation with workspace management
+  - Git operations inside VM (init, commit)
+  - Artifact creation and cleanup
+- **Use case**: Customers setting up CI agent infrastructure
+
+### Test 26: Windows Environment & Registry
+- **Purpose**: Test environment variable and registry configuration via scripts
+- **Provisioners**: 3 file + 4 powershell
+- **Files**: `scripts/set-environment.ps1`, `scripts/configure-registry.ps1`, `scripts/verify-settings.ps1`
+- **Tests**:
+  - Machine-level environment variable creation
+  - PATH manipulation from script
+  - Registry modifications (LongPaths, WER, crash dump)
+  - Cross-provisioner persistence verification
+  - Inline + script validation mixing
+- **Use case**: Customers needing system-level configuration
+
+### Test 27: Windows Edge Cases
+- **Purpose**: Catch corner cases before customers do
+- **Provisioners**: 4 file + 1 script + 9 powershell
+- **Files**: `scripts/test-*.ps1`, `scripts/app/` (Dockerfile, app.txt)
+- **Tests**:
+  - Long file paths (> 260 characters)
+  - Special characters in filenames (spaces, parens, dots, hyphens, UTF-8)
+  - Network downloads (Invoke-WebRequest, TLS config)
+  - Directory copy via file provisioner
+  - Inline JSON creation (heredoc-style)
+  - Docker availability check
+  - Cross-provisioner state persistence (env vars + files)
+  - PowerShell `script` attribute (Packer auto-upload)
+- **Use case**: Pre-testing edge cases to prevent customer issues
+
 ### Test 15: Permission Tests
 - **Purpose**: Comprehensive file provisioner permission testing
 - **Tests**: Script copying, chmod, execution verification
@@ -217,13 +296,56 @@ test-scenarios/
 │       ├── validation/
 │       └── config/
 │
-└── 16-advanced-permissions/  # Advanced permission scenarios
+├── 16-advanced-permissions/  # Advanced permission scenarios
+│   ├── packer.pkr.hcl
+│   ├── settings.env
+│   └── scripts/
+│       ├── secured/
+│       ├── elevated/
+│       └── restricted/
+│
+├── 17-windows-1/            # Windows basic tools
+├── 18-windows-minimal/      # Windows minimal (no provisioners)
+├── 19-windows-java-dotnet/  # Windows Java + .NET
+├── 20-windows-nodejs-frontend/  # Windows frontend tools
+├── 21-windows-devops/       # Windows DevOps tools
+├── 22-windows-full-ci/      # Windows full CI environment
+│
+├── 23-windows-file-scripts/ # Windows file provisioner + scripts
+│   ├── packer.pkr.hcl
+│   └── scripts/
+│       ├── setup-tools.ps1
+│       ├── install-packages.ps1
+│       └── verify-env.ps1
+│
+├── 24-windows-config-deploy/ # Windows config deployment
+│   ├── packer.pkr.hcl
+│   └── scripts/
+│       ├── config/           # JSON, YAML, PS1 configs
+│       └── setup/            # Deploy + validate scripts
+│
+├── 25-windows-cicd-pipeline/ # Windows CI/CD simulation
+│   ├── packer.pkr.hcl
+│   └── scripts/
+│       ├── setup-ci-agent.ps1
+│       ├── build-simulation.ps1
+│       └── cleanup.ps1
+│
+├── 26-windows-env-registry/  # Windows env vars + registry
+│   ├── packer.pkr.hcl
+│   └── scripts/
+│       ├── set-environment.ps1
+│       ├── configure-registry.ps1
+│       └── verify-settings.ps1
+│
+└── 27-windows-edge-cases/    # Windows edge cases
     ├── packer.pkr.hcl
-    ├── settings.env
     └── scripts/
-        ├── secured/
-        ├── elevated/
-        └── restricted/
+        ├── test-long-paths.ps1
+        ├── test-special-chars.ps1
+        ├── test-network-download.ps1
+        ├── test-script-provisioner.ps1
+        └── app/              # Dockerfile + app.txt
 ```
 
 Each test directory contains:
@@ -244,6 +366,25 @@ When testing, verify:
 - [ ] Access token is marked `sensitive = true`
 - [ ] File provisioner relative paths work
 - [ ] Heredocs with braces don't break parsing
+
+### Windows Testing Checklist (Tests 17-27)
+
+- [ ] File provisioner copies `.ps1` scripts to VM
+- [ ] File provisioner copies directories (trailing slash = contents)
+- [ ] Copied scripts execute correctly with `& script.ps1 -Param value`
+- [ ] PowerShell `script` attribute auto-uploads and runs scripts
+- [ ] Variables interpolate correctly in paths (backslash handling)
+- [ ] JSON/YAML config files parse correctly after copy
+- [ ] Machine-level env vars persist across provisioners
+- [ ] Registry modifications (LongPaths, WER) are applied
+- [ ] PATH additions survive across provisioner boundaries
+- [ ] Long file paths (> 260 chars) work when LongPaths is enabled
+- [ ] Special characters in filenames work (spaces, parens, dots)
+- [ ] UTF-8 content reads/writes correctly
+- [ ] Network downloads work (Invoke-WebRequest, TLS 1.2)
+- [ ] Git operations work inside the VM
+- [ ] Docker CLI is accessible
+- [ ] Cross-provisioner state persists (files + env vars)
 
 ### Permission Testing Checklist (Tests 15-16)
 

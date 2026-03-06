@@ -1,0 +1,21 @@
+service:
+  name: harness-ci-agent
+  display_name: "Harness CI Agent"
+  description: "Manages CI build execution"
+  startup_type: automatic
+
+paths:
+  install_dir: "C:\\Harness\\Agent"
+  data_dir: "C:\\Harness\\Data"
+  log_dir: "C:\\Harness\\Logs"
+  temp_dir: "C:\\Harness\\Temp"
+
+network:
+  listen_port: 8080
+  health_port: 8081
+  timeout_seconds: 30
+
+resources:
+  max_concurrent_builds: 4
+  max_memory_mb: 4096
+  cleanup_interval_minutes: 30

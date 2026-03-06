@@ -1,0 +1,22 @@
+{
+  "application": {
+    "name": "harness-ci-agent",
+    "version": "1.0.0",
+    "environment": "production"
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "maxConnections": 100
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "outputDir": "C:\\Logs\\app"
+  },
+  "features": {
+    "enableMetrics": true,
+    "enableHealthCheck": true,
+    "cacheTtlSeconds": 300
+  }
+}
