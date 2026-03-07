@@ -52,6 +52,7 @@ provisioner "powershell" {
     "javac -version",
     "Write-Host \"JAVA_HOME = $env:JAVA_HOME\"",
     "if (-not $env:JAVA_HOME) { Write-Error 'JAVA_HOME is not set'; exit 1 }",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== JDK installed ==='"
   ]
 }
@@ -70,6 +71,7 @@ provisioner "powershell" {
     "yarn --version",
     "pnpm --version",
     "tsc --version",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== Node.js installed ==='"
   ]
 }
@@ -85,6 +87,7 @@ provisioner "powershell" {
     "python --version",
     "pip --version",
     "pip install --quiet virtualenv",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== Python installed ==='"
   ]
 }
@@ -98,6 +101,7 @@ provisioner "powershell" {
     "Import-Module $env:ChocolateyInstall\\helpers\\chocolateyProfile.psm1",
     "Update-SessionEnvironment",
     "go version",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== Go installed ==='"
   ]
 }
@@ -111,6 +115,7 @@ provisioner "powershell" {
     "Import-Module $env:ChocolateyInstall\\helpers\\chocolateyProfile.psm1",
     "Update-SessionEnvironment",
     "dotnet --version",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== .NET SDK installed ==='"
   ]
 }
@@ -128,7 +133,8 @@ provisioner "powershell" {
     "Import-Module $env:ChocolateyInstall\\helpers\\chocolateyProfile.psm1",
     "Update-SessionEnvironment",
     "mvn --version 2>&1 | Select-Object -First 1",
-    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1; $global:LASTEXITCODE = 0",
+    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== Maven + Gradle installed ==='"
   ]
 }
@@ -143,6 +149,7 @@ provisioner "powershell" {
     "Update-SessionEnvironment",
     "cmake --version 2>&1 | Select-Object -First 1",
     "make --version 2>&1 | Select-Object -First 1",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== CMake + Make installed ==='"
   ]
 }
@@ -161,6 +168,7 @@ provisioner "powershell" {
     "Update-SessionEnvironment",
     "kubectl version --client 2>&1 | Select-Object -First 1",
     "helm version --short 2>&1",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== kubectl + Helm installed ==='"
   ]
 }
@@ -176,6 +184,7 @@ provisioner "powershell" {
     "terraform version 2>&1 | Select-Object -First 1",
     "aws --version 2>&1",
     "az version 2>&1 | Select-String 'azure-cli'",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== Terraform + Cloud CLIs installed ==='"
   ]
 }
@@ -195,6 +204,7 @@ provisioner "powershell" {
     "jq --version",
     "yq --version",
     "nuget help 2>&1 | Select-Object -First 1",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '=== CLI utilities installed ==='"
   ]
 }
@@ -222,7 +232,7 @@ provisioner "powershell" {
     "",
     "Write-Host '--- Build Tools ---'",
     "mvn --version 2>&1 | Select-Object -First 1 | ForEach-Object { Write-Host \"  Maven:   $_\" }",
-    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1 | ForEach-Object { Write-Host \"  Gradle:  $_\" }; $global:LASTEXITCODE = 0",
+    "gradle --version 2>&1 | Where-Object { $_ -match 'Gradle' } | Select-Object -First 1 | ForEach-Object { Write-Host \"  Gradle:  $_\" }",
     "cmake --version 2>&1 | Select-Object -First 1 | ForEach-Object { Write-Host \"  CMake:   $_\" }",
     "make --version 2>&1 | Select-Object -First 1 | ForEach-Object { Write-Host \"  Make:    $_\" }",
     "Write-Host \"  npm:     $(npm --version)\"",
@@ -248,6 +258,7 @@ provisioner "powershell" {
     "Write-Host '--- Disk Usage ---'",
     "Get-PSDrive C | ForEach-Object { Write-Host \"  Used: $([math]::Round($_.Used/1GB,1)) GB  Free: $([math]::Round($_.Free/1GB,1)) GB  Total: $([math]::Round(($_.Used+$_.Free)/1GB,1)) GB\" }",
     "Write-Host ''",
+    "$global:LASTEXITCODE = 0",
     "Write-Host '================================================================'",
     "Write-Host '         All tools verified successfully!                       '",
     "Write-Host '================================================================'"
