@@ -51,6 +51,12 @@ Comprehensive test suite for validating the BYOI Builder plugin.
 | 15 | permission-tests | File provisioner permissions | Script copy, chmod, execution |
 | 16 | advanced-permissions | Service user permissions | User/group, elevated, restricted |
 
+### Negative / diagnostic (Linux) — lab only
+
+| # | Name | Description | Expected Harness result |
+|---|------|-------------|-------------------------|
+| 28 | ubuntu2404-block-ci-health-port | After `cloud-final`, `iptables` DROP inbound TCP 9079 | Image build OK; **Image Use health check fails** (repro blocked lite-engine port) |
+
 ## Quick Start
 
 ### 1. Run Parser Tests (No GCP Required)

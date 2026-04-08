@@ -1,0 +1,13 @@
+[Unit]
+Description=LAB ONLY: block Harness CI lite-engine health checks (TCP 9079) after cloud-init
+After=cloud-final.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Inserts a rule after cloud-init completes, simulating a host firewall policy that blocks the runner from reaching lite-engine on 9079.
+ExecStart=/usr/sbin/iptables -I INPUT -p tcp --dport 9079 -j DROP
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
