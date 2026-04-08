@@ -1,0 +1,22 @@
+# LAB ONLY — replicate "Machine health check failed" / lite-engine unreachable on 9079
+#
+# Runs after the network is up (so Harness user-data can still wget/curl to GitHub,
+# app.harness.io, metadata) but BEFORE cloud-config.service executes the #cloud-config
+# runcmd that downloads and starts lite-engine. Inbound TCP 9079 is DROPped for the whole
+# CI boot, so the runner never completes TLS health checks — matching customer symptom
+# (provision OK, health never OK), unlike scenario 28 which often loses the race.
+
+[Unit]
+Description=LAB ONLY: DROP inbound TCP 9079 before cloud-config (Harness CI health port)
+DefaultDependencies=no
+After=network-online.target
+Before=cloud-config.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/iptables -I INPUT -p tcp --dport 9079 -j DROP
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,4 +1,10 @@
-# 28 — Ubuntu 24.04 — LAB: block CI health port (9079)
+# 28 — Ubuntu 24.04 — LAB: block CI health port (9079) **after** cloud-final
+
+## Prefer scenario 29
+
+Health checks often **win the race** before the `After=cloud-final` iptables rule runs, so steps can still succeed. For a **reliable** repro of “provision OK, health never OK,” use **`29-ubuntu2404-early-block-ci-health-9079`** (`Before=cloud-config.service`).
+
+---
 
 ## Purpose
 

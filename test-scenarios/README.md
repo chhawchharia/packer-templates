@@ -55,7 +55,8 @@ Comprehensive test suite for validating the BYOI Builder plugin.
 
 | # | Name | Description | Expected Harness result |
 |---|------|-------------|-------------------------|
-| 28 | ubuntu2404-block-ci-health-port | After `cloud-final`, `iptables` DROP inbound TCP 9079 | Image build OK; **Image Use health check fails** (repro blocked lite-engine port) |
+| 28 | ubuntu2404-block-ci-health-port | After `cloud-final`, `iptables` DROP inbound TCP 9079 | Unreliable: health may pass first (race). Prefer **29**. |
+| 29 | ubuntu2404-early-block-ci-health-9079 | **Before `cloud-config.service`**, `iptables` DROP inbound TCP 9079 | Image build OK; **Image Use health check fails** (matches blocked-9079 symptom) |
 
 ## Quick Start
 
